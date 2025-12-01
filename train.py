@@ -14,7 +14,6 @@ from tensorboardX import SummaryWriter
 from tqdm import tqdm
 import random
 import numpy as np
-from thop import profile
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -38,17 +37,6 @@ Set up environment: define paths, download data, and set device
 dev = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 logging.info('GPU AVAILABLE? ' + str(torch.cuda.is_available()))
 
-def seed_torch(seed):
-    random.seed(seed)
-    os.environ['PYTHONHASHSEED'] = str(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed(seed)
-    torch.backends.cudnn.benchmark = False
-    torch.backends.cudnn.deterministic = True
-
-seed_torch(seed=20250323)
-
 train_loader, val_loader = get_loaders(opt)
 test_loader = get_test_loaders(opt)
 
@@ -57,12 +45,6 @@ Load Model then define other aspects of the model
 """
 logging.info('LOADING Model')
 model = load_model(opt, dev)
-
-dummy_input = torch.randn(1, 3, 256, 256).cuda()
-dummy_input2 = torch.randn(1, 3, 256, 256).cuda()
-flops, params = profile(model, (dummy_input,dummy_input2,))
-print('flops: ', flops, 'params: ', params)
-print('flops: %.2f M, params: %.2f M' % (flops / 1000000.0, params / 1000000.0))
 
 criterion = get_criterion(opt)
 
